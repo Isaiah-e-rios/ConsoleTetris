@@ -159,32 +159,24 @@ public:
             orientation = 1;
             this->setShape(origin - MAX_COL, origin, origin + MAX_COL, origin + MAX_COL + 1);
         }
-        else
-            setUp(origin - 1);
     }
     void setDown(int origin) {
         if ((origin - MAX_COL - 1) / MAX_COL == (origin - MAX_COL) / MAX_COL) {
             orientation = 3;
             this->setShape(origin + MAX_COL, origin, origin - MAX_COL, origin - MAX_COL - 1);
         }
-        else
-            setDown(origin - 1);
     }
     void setLeft(int origin) {
         orientation = 2;
         if ((origin + 1) / MAX_COL == (origin) / MAX_COL && (origin - 1) / MAX_COL == (origin) / MAX_COL) {
             this->setShape(origin - 1, origin, origin + 1, origin - MAX_COL + 1);
         }
-        else
-            setLeft(origin - 1);
     }
     void setRight(int origin) {
         if ((origin + 1) / MAX_COL == (origin) / MAX_COL && (origin - 1) / MAX_COL == (origin) / MAX_COL) {
             orientation = 0;
             this->setShape(origin + 1, origin, origin - 1, origin + MAX_COL - 1);
         }
-        else
-            setRight(origin - 1);
     }
 };
 
@@ -238,32 +230,25 @@ public:
             orientation = 1;
             this->setShape(origin - MAX_COL, origin, origin + MAX_COL, origin + MAX_COL - 1);
         }
-        else
-            setUp(origin - 1);
     }
     void setDown(int origin) {
         if ((origin - MAX_COL + 1) / MAX_COL == (origin - MAX_COL) / MAX_COL) {
             orientation = 3;
             this->setShape(origin + MAX_COL, origin, origin - MAX_COL, origin - MAX_COL + 1);
         }
-        else
-            setDown(origin - 1);
     }
     void setLeft(int origin) {
         orientation = 0;
         if ((origin + 1) / MAX_COL == (origin) / MAX_COL && (origin - 1) / MAX_COL == (origin) / MAX_COL) {
             this->setShape(origin - 1, origin, origin + 1, origin + MAX_COL + 1);
         }
-        else
-            setLeft(origin - 1);
+
     }
     void setRight(int origin) {
         if ((origin + 1) / MAX_COL == (origin) / MAX_COL && (origin - 1) / MAX_COL == (origin) / MAX_COL) {
             orientation = 2;
             this->setShape(origin + 1, origin, origin - 1, origin - MAX_COL - 1);
         }
-        else
-            setRight(origin - 1);
     }
 };
 
@@ -286,35 +271,115 @@ public:
     ShapeS(int color) :Shape((MAX_COL / 2) + 1, MAX_COL / 2, MAX_COL + (MAX_COL / 2) - 1, MAX_COL + (MAX_COL / 2), color) {
         orientation = 0;
     }
-    void rotateShapeLeft() {};
-    void rotateShapeRight() {};
+    void rotateShapeLeft() {
+        int origin = this->getBlockTwoIndex();
+        if (orientation == 0) {
+            setUp(origin);
+        }
+        else {
+            setDown(origin);
+        }
+    };
+    void rotateShapeRight() {
+        int origin = this->getBlockTwoIndex();
+        if (orientation == 0) {
+            setUp(origin);
+        }
+        else {
+            setDown(origin);
+        }
+    };
 
     void setDown(int origin) {
         if ((origin + 1) / MAX_COL == origin / MAX_COL && (origin - 1 + MAX_COL) / MAX_COL == (origin + MAX_COL) / MAX_COL) {
             orientation = 0;
             this->setShape(origin + 1, origin, origin + MAX_COL, origin + MAX_COL - 1);
         }
-        else setDown(origin - 1);
     }
     void setUp(int origin) {
-        if ((origin + 1) / MAX_COL == origin / MAX_COL && (origin - 1 + MAX_COL) / MAX_COL == (origin + MAX_COL) / MAX_COL) {
-            orientation = 0;
-            this->setShape(origin + 1, origin, origin + MAX_COL, origin + MAX_COL - 1);
+        if ((origin + 1) / MAX_COL == origin / MAX_COL ) {
+            orientation = 1;
+            this->setShape(origin - MAX_COL, origin, origin + 1, origin + MAX_COL + 1);
         }
-        else setDown(origin - 1);
     }
 };
+
+//Z Shape
+//0(down) 1(up)
+//* *   ->   *
+//  * * -> * *
+//         *
 class ShapeZ : public Shape {
+private:
+    int orientation;
 public:
-    ShapeZ(int color) :Shape((MAX_COL / 2) - 1, MAX_COL / 2, MAX_COL + (MAX_COL / 2) + 1, MAX_COL + (MAX_COL / 2), color) {}
-    void rotateShapeLeft() {};
-    void rotateShapeRight() {};
+    ShapeZ(int color) :Shape((MAX_COL / 2) - 1, MAX_COL / 2, MAX_COL + (MAX_COL / 2) + 1, MAX_COL + (MAX_COL / 2), color) {
+        orientation = 0;
+    }
+    void rotateShapeLeft() {
+        int origin = this->getBlockTwoIndex();
+        if (orientation == 0) {
+            setUp(origin);
+        }
+        else {
+            setDown(origin);
+        }
+    };
+    void rotateShapeRight() {
+        int origin = this->getBlockTwoIndex();
+        if (orientation == 0) {
+            setUp(origin);
+        }
+        else {
+            setDown(origin);
+        }
+    };
+
+    void setDown(int origin) {
+        if ((origin - 1) / MAX_COL == origin / MAX_COL && (origin + 1 + MAX_COL) / MAX_COL == (origin + MAX_COL) / MAX_COL) {
+            orientation = 0;
+            this->setShape(origin - 1, origin, origin + MAX_COL, origin + MAX_COL + 1);
+        }
+    }
+    void setUp(int origin) {
+        if ((origin - 1) / MAX_COL == origin / MAX_COL) {
+            orientation = 1;
+            this->setShape(origin - MAX_COL, origin, origin - 1, origin + MAX_COL - 1);
+        }
+    }
 };
+
+//I shape
+//  0(down)   1(up)
+//             *
+//* * * * ->   *
+//             *
+//             *
 class ShapeI : public Shape {
+private:
+    int orientation;
 public:
-    ShapeI(int color) :Shape((MAX_COL / 2) - 2, (MAX_COL / 2)-1, (MAX_COL / 2), (MAX_COL / 2) + 1, color) {}
-    void rotateShapeLeft() {};
+    ShapeI(int color) :Shape((MAX_COL / 2) - 2, (MAX_COL / 2)-1, (MAX_COL / 2), (MAX_COL / 2) + 1, color) {
+        orientation = 0;
+    }
+    void rotateShapeLeft() {
+        int origin = this->getBlockTwoIndex();
+        if (orientation == 0)
+            setUp(origin);
+        else
+            setDown(origin);
+    };
     void rotateShapeRight() {};
+    void setDown(int origin) {
+        if ((origin + 2) / MAX_COL == origin/MAX_COL && (origin-1) / MAX_COL == origin / MAX_COL){
+            orientation = 0;
+            this->setShape(origin - 1, origin, origin + 1, origin + 2);
+        }
+    };
+    void setUp(int origin){
+        orientation = 1;
+        this->setShape(origin-MAX_COL,origin, origin + MAX_COL, origin + MAX_COL*2);
+    }
 };
 class ShapeT : public Shape {
 public:
@@ -492,7 +557,7 @@ void Tetris::createShape(){
     int i = rand()%1;
     
     if(i==0){
-        shape = new ShapeJ(0);
+        shape = new ShapeI(0);
     }
     else if(i==1){
         shape = new ShapeJ(0);
