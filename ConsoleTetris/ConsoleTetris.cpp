@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <time.h>
-#include <cstdlib>
 
 #define MAX_ROW 24
 #define MAX_COL 10
@@ -110,7 +109,7 @@ class Shape {
         ~Shape() {};
 };
 
-//L shape with Starting orientation
+//Shape L
 //0(Right) 1(up) 2(Left) 3(Down)
 // * * *    *          *    * *
 // *     -> *   -> * * * ->   *
@@ -125,23 +124,46 @@ private:
             orientation = 1;
             this->setShape(origin - MAX_COL, origin, origin + MAX_COL, origin + MAX_COL + 1);
         }
+        else{
+            setUp(origin - 1);
+        }
+        
     }
     void setDown(int origin) {
         if ((origin - MAX_COL - 1) / MAX_COL == (origin - MAX_COL) / MAX_COL) {
             orientation = 3;
             this->setShape(origin + MAX_COL, origin, origin - MAX_COL, origin - MAX_COL - 1);
         }
+        else {
+            //setDown(origin + 1);
+        }
     }
     void setLeft(int origin) {
         orientation = 2;
-        if ((origin + 1) / MAX_COL == (origin) / MAX_COL && (origin - 1) / MAX_COL == (origin) / MAX_COL) {
-            this->setShape(origin - 1, origin, origin + 1, origin - MAX_COL + 1);
+        if ((origin + 1) / MAX_COL == (origin) / MAX_COL) {
+            if ((origin - 1) / MAX_COL == (origin) / MAX_COL) {
+                this->setShape(origin - 1, origin, origin + 1, origin - MAX_COL + 1);
+            }
+            else {
+                setLeft(origin + 1);
+            }
+        }
+        else {
+            setLeft(origin - 1);
         }
     }
     void setRight(int origin) {
-        if ((origin + 1) / MAX_COL == (origin) / MAX_COL && (origin - 1) / MAX_COL == (origin) / MAX_COL) {
-            orientation = 0;
-            this->setShape(origin + 1, origin, origin - 1, origin + MAX_COL - 1);
+        if ((origin + 1) / MAX_COL == (origin) / MAX_COL) {
+            if ((origin - 1) / MAX_COL == (origin) / MAX_COL) {
+                orientation = 0;
+                this->setShape(origin + 1, origin, origin - 1, origin + MAX_COL - 1);
+            }
+            else {
+                setRight(origin + 1);
+            }
+        }
+        else {
+            setRight(origin - 1);
         }
     }
 public:
@@ -181,7 +203,7 @@ public:
     };
 };
 
-//J shape with orientations
+//shape J
 //   0(left)  1(up)   2(right)   3(down)
 // * * *      *        *          * *
 //     * ->   *   ->   * * * ->   *
@@ -195,19 +217,32 @@ private:
             orientation = 1;
             this->setShape(origin - MAX_COL, origin, origin + MAX_COL, origin + MAX_COL - 1);
         }
+        else {
+            setUp(origin + 1);
+        }
     }
     void setDown(int origin) {
         if ((origin - MAX_COL + 1) / MAX_COL == (origin - MAX_COL) / MAX_COL) {
             orientation = 3;
             this->setShape(origin + MAX_COL, origin, origin - MAX_COL, origin - MAX_COL + 1);
         }
+        else {
+            setDown(origin - 1);
+        }
     }
     void setLeft(int origin) {
         orientation = 0;
-        if ((origin + 1) / MAX_COL == (origin) / MAX_COL && (origin - 1) / MAX_COL == (origin) / MAX_COL) {
-            this->setShape(origin - 1, origin, origin + 1, origin + MAX_COL + 1);
+        if ((origin + 1) / MAX_COL == (origin) / MAX_COL) {
+            if ((origin - 1) / MAX_COL == (origin) / MAX_COL) {
+                this->setShape(origin - 1, origin, origin + 1, origin + MAX_COL + 1);
+            }
+            else {
+                setLeft(origin + 1);
+            }
         }
-
+        else {
+            setLeft(origin - 1);
+        }
     }
     void setRight(int origin) {
         if ((origin + 1) / MAX_COL == (origin) / MAX_COL && (origin - 1) / MAX_COL == (origin) / MAX_COL) {
@@ -251,6 +286,9 @@ public:
     };
 };
 
+//Shape O
+// * *
+// * *
 class ShapeO : public Shape {
 public:
     ShapeO(int color) :Shape((MAX_COL / 2) - 1, MAX_COL / 2, MAX_COL + (MAX_COL / 2) -1, MAX_COL + (MAX_COL / 2), color) {}
@@ -491,14 +529,14 @@ class Tetris{
                 printMap();
                 while (checkBound(MAX_COL))
                 {
-                    cout << "Enter l to move left r to move right: ";
-                    cin >> a;
-                    if(a == 'l'){ moveShapeLeft(); }
-                    else if (a == 'r') { moveShapeRight(); }
                     cout << "Enter l to rotate left r to rotate right: ";
                     cin >> a;
                     if (a == 'l') { rotateShapeLeft(); }
                     else if (a == 'r') { rotateShapeRight(); }
+                    cout << "Enter l to move left r to move right: ";
+                    cin >> a;
+                    if(a == 'l'){ moveShapeLeft(); }
+                    else if (a == 'r') { moveShapeRight(); }
 
                     moveShapeDown();
                     system("CLS");
@@ -628,10 +666,10 @@ void Tetris::switchLED(int ledIndex) {
 
 void Tetris::createShape(){
     srand(time(NULL));
-    int i = rand() % 7;
+    int i = rand() % 1;
     
     if(i==0){
-        shape = new ShapeL(0);
+        shape = new ShapeJ(0);
     }
     else if(i==1){
         shape = new ShapeJ(0);
