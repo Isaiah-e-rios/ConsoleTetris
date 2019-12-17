@@ -23,7 +23,7 @@ class Shape {
             previousIndecies[1] = shapeIndecies[1];
             previousIndecies[2] = shapeIndecies[2];
             previousIndecies[3] = shapeIndecies[3];
-        };
+        }
 
     public:
         Shape() {
@@ -33,7 +33,7 @@ class Shape {
             shapeIndecies[3] = 0;
             this->setPevious();
             shapeColor = 0;
-        };
+        }
         Shape(int blockOne, int blockTwo, int blockThree, int blockFour) {
             shapeIndecies[0] = blockOne;
             shapeIndecies[1] = blockTwo;
@@ -41,7 +41,7 @@ class Shape {
             shapeIndecies[3] = blockFour;
             this->setPevious();
             shapeColor = 0;
-        };
+        }
         Shape(int blockOne, int blockTwo, int blockThree, int blockFour, int color) {
             shapeIndecies[0] = blockOne;
             shapeIndecies[1] = blockTwo;
@@ -49,7 +49,7 @@ class Shape {
             shapeIndecies[3] = blockFour;
             this->setPevious();
             shapeColor = color;
-        };
+        }
 
         void setShape(int blockOne, int blockTwo, int blockThree, int blockFour) {
             this->setPevious();
@@ -58,7 +58,7 @@ class Shape {
             shapeIndecies[1] = blockTwo;
             shapeIndecies[2] = blockThree;
             shapeIndecies[3] = blockFour;
-        };
+        }
 
         //rotates will be defined by shapes
         virtual void rotateShapeLeft() = 0;
@@ -78,7 +78,7 @@ class Shape {
             shapeIndecies[1] += MAX_COL;
             shapeIndecies[2] += MAX_COL;
             shapeIndecies[3] += MAX_COL;
-        };
+        }
         void shiftLeft() {
             if (shapeIndecies[0] / MAX_COL == (shapeIndecies[0] - 1) / MAX_COL && shapeIndecies[1] / MAX_COL == (shapeIndecies[1] - 1) / MAX_COL &&
                 shapeIndecies[2] / MAX_COL == (shapeIndecies[2] - 1) / MAX_COL && shapeIndecies[3] / MAX_COL == (shapeIndecies[3] - 1) / MAX_COL)
@@ -88,7 +88,7 @@ class Shape {
                 shapeIndecies[2] -= 1;
                 shapeIndecies[3] -= 1;
             }
-        };
+        }
         void shiftRight() {
             if (shapeIndecies[0] / MAX_COL == (shapeIndecies[0] + 1) / MAX_COL && shapeIndecies[1] / MAX_COL == (shapeIndecies[1] + 1) / MAX_COL &&
                 shapeIndecies[2] / MAX_COL == (shapeIndecies[2] + 1) / MAX_COL && shapeIndecies[3] / MAX_COL == (shapeIndecies[3] + 1) / MAX_COL)
@@ -98,13 +98,13 @@ class Shape {
                 shapeIndecies[2] += 1;
                 shapeIndecies[3] += 1;
             }
-        };
+        }
 
-
-        int getBlockOneIndex() { return shapeIndecies[0]; };
-        int getBlockTwoIndex() { return shapeIndecies[1]; };
-        int getBlockThreeIndex() { return shapeIndecies[2]; };
-        int getBlockFourIndex() { return shapeIndecies[3]; };
+        int getColor() { return shapeColor; }
+        int getBlockOneIndex() { return shapeIndecies[0]; }
+        int getBlockTwoIndex() { return shapeIndecies[1]; }
+        int getBlockThreeIndex() { return shapeIndecies[2]; }
+        int getBlockFourIndex() { return shapeIndecies[3]; }
 
         ~Shape() {};
 };
@@ -419,7 +419,13 @@ public:
         else
             setDown(origin);
     };
-    void rotateShapeRight() {};
+    void rotateShapeRight() {
+        int origin = this->getBlockTwoIndex();
+        if (orientation == 0)
+            setUp(origin);
+        else
+            setDown(origin);
+    };
 };
 //T shape
 //(0)down  (1)right (2)up   (3)left
@@ -493,23 +499,24 @@ public:
     };
 };
 
+//Map has col*row items of [led index][on or off][color value]
 class Tetris{
     private:
-        int map[MAX_ROW * MAX_COL][2];
+        int map[MAX_ROW * MAX_COL][3];
         int score;
         Shape *shape;
-        
+
+
         bool checkBound(int moveValue);
         void initGame(); 
         void printMap();
 
-
-
         void createShape();
-        bool checkCompletedRow(int row) {};
-        void deleteRow(int row) {};
-        void shiftBlocksDown(int row) {};
-        void switchLED(int ledNumber);
+        void checkCompletedRows();
+        void deleteRow(int row);
+        void shiftBlocksDown(int row);
+        void shapeOnOff(Shape *s);
+        void switchLED(int ledNumber, int color);
 
         //Controll Calls
         void moveShapeLeft();
@@ -519,66 +526,192 @@ class Tetris{
         void rotateShapeLeft();
         void rotateShapeRight();
     public:
-        void play() {
-            char a='t';
-            initGame();
-            while (a != 'f') {
-                createShape();
-                system("CLS");
-                cout << endl << endl;
-                printMap();
-                while (checkBound(MAX_COL))
-                {
-                    cout << "Enter l to rotate left r to rotate right: ";
-                    cin >> a;
-                    if (a == 'l') { rotateShapeLeft(); }
-                    else if (a == 'r') { rotateShapeRight(); }
-                    cout << "Enter l to move left r to move right: ";
-                    cin >> a;
-                    if(a == 'l'){ moveShapeLeft(); }
-                    else if (a == 'r') { moveShapeRight(); }
+        Tetris() {
 
-                    moveShapeDown();
-                    system("CLS");
-                    cout << endl << endl;
-                    printMap();
-                }
-                cin >> a;
-            }
-
-        };
+        }
+        void play();
         void restart() {};
 };
 
+//Row Completion
+void Tetris::checkCompletedRows() {
+    int filledCount;
+    for (int i = 0; i < MAX_ROW; i++) {
+        filledCount = 0;
+        for (int j = 0; j < MAX_COL; j++) {
+            if (map[i * MAX_COL + j][1] == 1) {
+                filledCount++;
+            }
+            else {
+                filledCount = 0;
+                j = MAX_COL;
+            }
+        }
+        if (filledCount == MAX_COL) {
+            deleteRow(i);
+            shiftBlocksDown(i);
+        }
+    }
+}
+void Tetris::deleteRow(int row) {
+    for (int i = 0; i < MAX_COL; i++) {
+        map[row * MAX_COL + i][1] = 0;
+        map[row * MAX_COL + i][2] = 0;
+    }
+}
+void Tetris::shiftBlocksDown(int emptyRow) {
+    for (int i = emptyRow-1; i >= 0; i--) {
+        for (int j = 0; j < MAX_COL; j++) {
+            map[(i + 1) * MAX_COL + j][1] = map[i * MAX_COL + j][1];
+            map[(i + 1) * MAX_COL + j][2] = map[i * MAX_COL + j][2];
+        }
+        deleteRow(i);
+    }
+}
+void Tetris::switchLED(int ledIndex, int color) {
+    if (map[ledIndex][1] == 1) {
+        map[ledIndex][1] = 0;
+        map[ledIndex][2] = 0;
+    }
+    else {
+        map[ledIndex][1] = 1;
+        map[ledIndex][2] = color;
+    }
+}
+
+//Shape Mutators
 void Tetris::rotateShapeRight() {
-    switchLED(shape->getBlockOneIndex());
-    switchLED(shape->getBlockTwoIndex());
-    switchLED(shape->getBlockThreeIndex());
-    switchLED(shape->getBlockFourIndex());
+    shapeOnOff(shape);
     shape->rotateShapeRight();
     if (!checkBound(0))
         shape->undoMove();
-    switchLED(shape->getBlockOneIndex());
-    switchLED(shape->getBlockTwoIndex());
-    switchLED(shape->getBlockThreeIndex());
-    switchLED(shape->getBlockFourIndex());
+    shapeOnOff(shape);
 
 }
 void Tetris::rotateShapeLeft() {
-    switchLED(shape->getBlockOneIndex());
-    switchLED(shape->getBlockTwoIndex());
-    switchLED(shape->getBlockThreeIndex());
-    switchLED(shape->getBlockFourIndex());
+    shapeOnOff(shape);
     shape->rotateShapeLeft();
     if (!checkBound(0))
         shape->undoMove();
-    switchLED(shape->getBlockOneIndex());
-    switchLED(shape->getBlockTwoIndex());
-    switchLED(shape->getBlockThreeIndex());
-    switchLED(shape->getBlockFourIndex());
+    shapeOnOff(shape);
+}
+bool Tetris::moveShapeDown() {
+    if (checkBound(MAX_COL))
+    {
+        shapeOnOff(shape);
+        shape->shiftDown();
+        shapeOnOff(shape);
+        return true;
+    }
+    else
+        return false;
+}
+void Tetris::moveShapeLeft() {
+    if (checkBound(-1)) {
+        shapeOnOff(shape);
+        shape->shiftLeft();
+        shapeOnOff(shape);
+    }
+}
+void Tetris::moveShapeRight() {
+    if (checkBound(+1)) {
+        shapeOnOff(shape);
+        shape->shiftRight();
+        shapeOnOff(shape);
 
+    }
 }
 
+void Tetris::shapeOnOff(Shape* currentShape) {
+    int color = shape->getColor();
+    switchLED(shape->getBlockOneIndex(), color);
+    switchLED(shape->getBlockTwoIndex(), color);
+    switchLED(shape->getBlockThreeIndex(), color);
+    switchLED(shape->getBlockFourIndex(), color);
+}
+
+
+
+//game functions
+void Tetris::createShape(){
+    srand(time(NULL));
+    int i = rand() % 1;
+    
+    if(i==0){
+        shape = new ShapeO(0);
+    }
+    else if(i==1){
+        shape = new ShapeJ(0);
+    }
+    else if(i==2){
+        shape = new ShapeS(0);
+    }
+    else if(i==3){
+        shape = new ShapeZ(0);
+    }
+    else if(i==4){
+        shape = new ShapeT(0);
+    }
+    else if(i==5){
+        shape = new ShapeI(0);
+    }
+    else {
+        shape = new ShapeO(0);
+    }
+    shapeOnOff(shape);
+}
+void Tetris::initGame() {
+    for (int i = 0; i < MAX_ROW * MAX_COL; i++) {
+        map[i][0] = 0;
+        map[i][1] = 0;
+        map[i][2] = 0;
+    }
+};
+void Tetris::printMap(){
+    cout << "     R0 R1 R2 R3 R4 R5 R6 R7 R8 R9" << endl;
+    for(int i = 0; i < MAX_ROW; i++) {
+        cout << "C";
+        cout.width(2);
+        cout << i; 
+        cout << " ";
+        for (int j = 0; j < MAX_COL; j++) {
+            cout.width(3);
+            cout << map[i * MAX_COL + j][1];
+        }
+        cout << endl;
+    }
+};
+void Tetris::play() {
+    char a = 't';
+    initGame();
+    while (a != 'f') {
+        createShape();
+        system("CLS");
+        cout << endl << endl;
+        printMap();
+        //while shapecan move down
+        while (checkBound(MAX_COL))
+        {
+            //cout << "Enter l to rotate left r to rotate right: ";
+            //cin >> a;
+            //if (a == 'l') { rotateShapeLeft(); }
+            //else if (a == 'r') { rotateShapeRight(); }
+            cout << "Enter l to move left r to move right: ";
+            cin >> a;
+            if (a == 'l') { moveShapeLeft(); }
+            else if (a == 'r') { moveShapeRight(); }
+
+            moveShapeDown();
+            system("CLS");
+            cout << endl << endl;
+            printMap();
+        }
+        checkCompletedRows();
+        cout << "f to quit";
+        cin >> a;
+    }
+
+};
 bool Tetris::checkBound(int moveValue) {
     int b1 = shape->getBlockOneIndex();
     int b2 = shape->getBlockTwoIndex();
@@ -587,8 +720,8 @@ bool Tetris::checkBound(int moveValue) {
 
     if ((b1 + moveValue) >= (MAX_COL * MAX_ROW) || (b2 + moveValue) >= (MAX_COL * MAX_ROW) || (b3 + moveValue) >= (MAX_COL * MAX_ROW) || (b4 + moveValue) >= (MAX_COL * MAX_ROW))
         return false;
-    if(map[b1+moveValue][1] == 1){
-        if ((b1 + moveValue) != b2 && (b1 + moveValue) != b3 && (b1 + moveValue) != b4){
+    if (map[b1 + moveValue][1] == 1) {
+        if ((b1 + moveValue) != b2 && (b1 + moveValue) != b3 && (b1 + moveValue) != b4) {
             return false;
         }
     }
@@ -609,108 +742,6 @@ bool Tetris::checkBound(int moveValue) {
     }
     return true;
 }
-
-
-bool Tetris::moveShapeDown() {
-    if (checkBound(MAX_COL))
-    {
-        switchLED(shape->getBlockOneIndex());
-        switchLED(shape->getBlockTwoIndex());
-        switchLED(shape->getBlockThreeIndex());
-        switchLED(shape->getBlockFourIndex());
-        shape->shiftDown();
-        switchLED(shape->getBlockOneIndex());
-        switchLED(shape->getBlockTwoIndex());
-        switchLED(shape->getBlockThreeIndex());
-        switchLED(shape->getBlockFourIndex());
-        return true;
-    }
-    else
-        return false;
-}
-void Tetris::moveShapeLeft() {
-    if (checkBound(-1)) {
-        switchLED(shape->getBlockOneIndex());
-        switchLED(shape->getBlockTwoIndex());
-        switchLED(shape->getBlockThreeIndex());
-        switchLED(shape->getBlockFourIndex());
-        shape->shiftLeft();
-        switchLED(shape->getBlockOneIndex());
-        switchLED(shape->getBlockTwoIndex());
-        switchLED(shape->getBlockThreeIndex());
-        switchLED(shape->getBlockFourIndex());
-    }
-}
-
-void Tetris::moveShapeRight() {
-    if (checkBound(+1)) {
-        switchLED(shape->getBlockOneIndex());
-        switchLED(shape->getBlockTwoIndex());
-        switchLED(shape->getBlockThreeIndex());
-        switchLED(shape->getBlockFourIndex());
-        shape->shiftRight();
-        switchLED(shape->getBlockOneIndex());
-        switchLED(shape->getBlockTwoIndex());
-        switchLED(shape->getBlockThreeIndex());
-        switchLED(shape->getBlockFourIndex());
-    }
-}
-void Tetris::switchLED(int ledIndex) {
-    if (map[ledIndex][1] == 1) {
-        map[ledIndex][1] = 0;
-    }
-    else
-        map[ledIndex][1] = 1;
-}
-
-
-void Tetris::createShape(){
-    srand(time(NULL));
-    int i = rand() % 1;
-    
-    if(i==0){
-        shape = new ShapeJ(0);
-    }
-    else if(i==1){
-        shape = new ShapeJ(0);
-    }
-    else if(i==2){
-        shape = new ShapeS(0);
-    }
-    else if(i==3){
-        shape = new ShapeZ(0);
-    }
-    else if(i==4){
-        shape = new ShapeT(0);
-    }
-    else if(i==5){
-        shape = new ShapeI(0);
-    }
-    else {
-        shape = new ShapeO(0);
-    }
-    switchLED(shape->getBlockOneIndex());
-    switchLED(shape->getBlockTwoIndex());
-    switchLED(shape->getBlockThreeIndex());
-    switchLED(shape->getBlockFourIndex());
-}
-
-void Tetris::initGame() {
-    for (int i = 0; i < MAX_ROW * MAX_COL; i++) {
-        map[i][0] = 0;
-        map[i][1] = 0;
-    }
-};
-
-void Tetris::printMap(){
-    for(int i = 0; i < MAX_ROW; i++) {
-        for (int j = 0; j < MAX_COL; j++) {
-            cout.width(3);
-            cout << map[i * MAX_COL + j][1];
-        }
-        cout << endl;
-    }
-};
 
 
 
